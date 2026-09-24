@@ -1,0 +1,581 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Mine Vision-X operations API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: auth
+  - name: dashboard
+  - name: vehicles
+  - name: devices
+  - name: hardware
+  - name: incidents
+  - name: trips
+  - name: safety
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /system/status:
+    get:
+      operationId: getSystemStatus
+      tags: [system]
+      security: [{ bearerAuth: [] }]
+      summary: Get Admin system status
+      responses:
+        "200":
+          description: System status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemStatus"
+        "403":
+          description: Admin access required
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Log in an operations user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "401":
+          description: Invalid credentials
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      security: [{ bearerAuth: [] }]
+      summary: End the current session
+      responses:
+        "204":
+          description: Session ended
+  /auth/webauthn/register/options:
+    post:
+      operationId: getWebAuthnRegistrationOptions
+      tags: [auth]
+      security: [{ bearerAuth: [] }]
+      summary: Get Admin WebAuthn registration options
+      responses:
+        "501":
+          description: WebAuthn is not configured in this environment
+  /auth/webauthn/register/verify:
+    post:
+      operationId: verifyWebAuthnRegistration
+      tags: [auth]
+      security: [{ bearerAuth: [] }]
+      summary: Verify an Admin WebAuthn registration
+      responses:
+        "501":
+          description: WebAuthn is not configured in this environment
+  /auth/webauthn/authenticate/options:
+    post:
+      operationId: getWebAuthnAuthenticationOptions
+      tags: [auth]
+      security: [{ bearerAuth: [] }]
+      summary: Get Admin WebAuthn authentication options
+      responses:
+        "501":
+          description: WebAuthn is not configured in this environment
+  /auth/webauthn/authenticate/verify:
+    post:
+      operationId: verifyWebAuthnAuthentication
+      tags: [auth]
+      security: [{ bearerAuth: [] }]
+      summary: Verify an Admin WebAuthn authentication
+      responses:
+        "501":
+          description: WebAuthn is not configured in this environment
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      security: [{ bearerAuth: [] }]
+      summary: Get the current session user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /auth/users:
+    get:
+      operationId: listUsers
+      tags: [auth]
+      security: [{ bearerAuth: [] }]
+      summary: List software users
+      responses:
+        "200":
+          description: User list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+    post:
+      operationId: createUser
+      tags: [auth]
+      security: [{ bearerAuth: [] }]
+      summary: Create an admin or Control Room user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Created user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      security: [{ bearerAuth: [] }]
+      summary: Get operational dashboard aggregates
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /vehicles:
+    get:
+      operationId: listVehicles
+      tags: [vehicles]
+      security: [{ bearerAuth: [] }]
+      summary: List vehicles
+      responses:
+        "200":
+          description: Vehicle list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Vehicle" }
+    post:
+      operationId: createVehicle
+      tags: [vehicles]
+      security: [{ bearerAuth: [] }]
+      summary: Register a vehicle and provision its device
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VehicleInput"
+      responses:
+        "201":
+          description: Vehicle created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vehicle"
+  /vehicles/{vehicleId}/speed-limit:
+    put:
+      operationId: updateVehicleSpeedLimit
+      tags: [vehicles]
+      security: [{ bearerAuth: [] }]
+      summary: Update a vehicle speed limit
+      parameters:
+        - { $ref: "#/components/parameters/VehicleId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpeedLimitInput"
+      responses:
+        "200":
+          description: Updated vehicle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vehicle"
+  /devices:
+    get:
+      operationId: listDevices
+      tags: [devices]
+      security: [{ bearerAuth: [] }]
+      summary: List provisioned Raspberry Pi devices
+      responses:
+        "200":
+          description: Device list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Device" }
+  /devices/{deviceId}:
+    get:
+      operationId: getDevice
+      tags: [devices]
+      security: [{ bearerAuth: [] }]
+      summary: Get a provisioned device
+      parameters:
+        - { $ref: "#/components/parameters/DeviceId" }
+      responses:
+        "200":
+          description: Device
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+  /hardware/telemetry:
+    post:
+      operationId: postHardwareTelemetry
+      tags: [hardware]
+      summary: Ingest authenticated Raspberry Pi telemetry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TelemetryInput"
+      responses:
+        "200":
+          description: Accepted telemetry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelemetryResult"
+  /incidents:
+    get:
+      operationId: listIncidents
+      tags: [incidents]
+      security: [{ bearerAuth: [] }]
+      summary: List safety incidents
+      responses:
+        "200":
+          description: Incident list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Incident" }
+  /incidents/{incidentId}:
+    get:
+      operationId: getIncident
+      tags: [incidents]
+      security: [{ bearerAuth: [] }]
+      summary: Get a safety incident
+      parameters:
+        - { $ref: "#/components/parameters/IncidentId" }
+      responses:
+        "200":
+          description: Incident
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Incident"
+  /incidents/{incidentId}/claim-resolution:
+    post:
+      operationId: claimIncidentResolution
+      tags: [incidents]
+      security: [{ bearerAuth: [] }]
+      summary: Claim resolution after backend safety verification
+      parameters:
+        - { $ref: "#/components/parameters/IncidentId" }
+      responses:
+        "200":
+          description: Resolution result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResolutionResult"
+  /trips:
+    get:
+      operationId: listTrips
+      tags: [trips]
+      security: [{ bearerAuth: [] }]
+      summary: List trips
+      responses:
+        "200":
+          description: Trip list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Trip" }
+    post:
+      operationId: createTrip
+      tags: [trips]
+      security: [{ bearerAuth: [] }]
+      summary: Create a trip
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TripInput"
+      responses:
+        "201":
+          description: Trip
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trip"
+  /trips/{tripId}/assign:
+    post:
+      operationId: assignTrip
+      tags: [trips]
+      security: [{ bearerAuth: [] }]
+      summary: Assign a registered vehicle
+      parameters:
+        - { $ref: "#/components/parameters/TripId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TripAssignmentInput"
+      responses:
+        "200":
+          description: Assigned trip
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trip"
+  /trips/{tripId}/unassign:
+    post:
+      operationId: unassignTrip
+      tags: [trips]
+      security: [{ bearerAuth: [] }]
+      summary: Return a trip to the free state
+      parameters:
+        - { $ref: "#/components/parameters/TripId" }
+      responses:
+        "200":
+          description: Unassigned trip
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Trip"
+  /safety/overview:
+    get:
+      operationId: getSafetyOverview
+      tags: [safety]
+      security: [{ bearerAuth: [] }]
+      summary: Get backend-derived safety rows
+      responses:
+        "200":
+          description: Safety overview
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SafetyRow" }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    VehicleId: { name: vehicleId, in: path, required: true, schema: { type: string } }
+    DeviceId: { name: deviceId, in: path, required: true, schema: { type: string } }
+    IncidentId: { name: incidentId, in: path, required: true, schema: { type: string } }
+    TripId: { name: tripId, in: path, required: true, schema: { type: string } }
+  schemas:
+    HealthStatus:
+      type: object
+      properties: { status: { type: string } }
+      required: [status]
+    SystemStatus:
+      type: object
+      properties:
+        backend: { type: string }
+        database: { type: string }
+        websocket: { type: string }
+        authentication: { type: string }
+        registeredVehicles: { type: integer }
+        connectedDevices: { type: integer }
+        activeIncidents: { type: integer }
+      required: [backend, database, websocket, authentication]
+    LoginInput:
+      type: object
+      properties:
+        username: { type: string, minLength: 1 }
+        password: { type: string, minLength: 1 }
+        role: { type: string, enum: [ADMIN, CONTROL_ROOM] }
+      required: [username, password, role]
+    AuthSession:
+      type: object
+      properties:
+        accessToken: { type: string }
+        user: { $ref: "#/components/schemas/User" }
+      required: [accessToken, user]
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        username: { type: string }
+        role: { type: string, enum: [ADMIN, CONTROL_ROOM] }
+        displayName: { type: string }
+      required: [id, username, role, displayName]
+    UserInput:
+      type: object
+      properties:
+        username: { type: string, minLength: 3 }
+        password: { type: string, minLength: 8 }
+        role: { type: string, enum: [ADMIN, CONTROL_ROOM] }
+        displayName: { type: string, minLength: 1 }
+      required: [username, password, role, displayName]
+    Device:
+      type: object
+      properties:
+        id: { type: string }
+        identifier: { type: string }
+        vehicleId: { type: string }
+        connectionStatus: { type: string, enum: [NOT_CONFIGURED, PROVISIONING, WAITING_FOR_CONNECTION, CONNECTED, CONNECTION_LOST, ERROR] }
+        lastSeen: { type: ["string", "null"], format: date-time }
+        gpsHealthy: { type: boolean }
+        sensorHealthy: { type: boolean }
+        cameraHealthy: { type: boolean }
+      required: [id, identifier, vehicleId, connectionStatus, lastSeen, gpsHealthy, sensorHealthy, cameraHealthy]
+    Vehicle:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        type: { type: string }
+        registrationStatus: { type: string, enum: [PROVISIONING, WAITING_FOR_CONNECTION, REGISTERED] }
+        operationalStatus: { type: string, enum: [RUNNING, IDLE, STOPPED, OFFLINE] }
+        connectionStatus: { type: string, enum: [NOT_CONFIGURED, PROVISIONING, WAITING_FOR_CONNECTION, CONNECTED, CONNECTION_LOST, ERROR] }
+        speed: { type: number }
+        speedLimit: { type: number }
+        lat: { type: ["number", "null"] }
+        lng: { type: ["number", "null"] }
+        visibility: { type: string, enum: [CLEAR, LOW, FOG, CRITICAL] }
+        completedCycles: { type: integer }
+        deviceId: { type: ["string", "null"] }
+        updatedAt: { type: string, format: date-time }
+      required: [id, name, type, registrationStatus, operationalStatus, connectionStatus, speed, speedLimit, lat, lng, visibility, completedCycles, deviceId, updatedAt]
+    VehicleInput:
+      type: object
+      properties:
+        id: { type: string, minLength: 2 }
+        name: { type: string, minLength: 1 }
+        type: { type: string, minLength: 1 }
+        deviceIdentifier: { type: string, minLength: 2 }
+        deviceSecret: { type: string, minLength: 8 }
+      required: [id, name, type, deviceIdentifier, deviceSecret]
+    SpeedLimitInput:
+      type: object
+      properties: { speedLimit: { type: number, minimum: 1, maximum: 120 } }
+      required: [speedLimit]
+    TelemetryInput:
+      type: object
+      properties:
+        deviceIdentifier: { type: string, minLength: 1 }
+        deviceSecret: { type: string, minLength: 1 }
+        timestamp: { type: string, format: date-time }
+        speedKmh: { type: number, minimum: 0 }
+        lat: { type: number, minimum: -90, maximum: 90 }
+        lng: { type: number, minimum: -180, maximum: 180 }
+        visibilityState: { type: string, enum: [CLEAR, LOW, FOG, CRITICAL] }
+        gpsHealthy: { type: boolean }
+        sensorHealthy: { type: boolean }
+        cameraHealthy: { type: boolean }
+      required: [deviceIdentifier, deviceSecret, timestamp, speedKmh, lat, lng, visibilityState, gpsHealthy, sensorHealthy, cameraHealthy]
+    TelemetryResult:
+      type: object
+      properties:
+        accepted: { type: boolean }
+        vehicle: { $ref: "#/components/schemas/Vehicle" }
+        incidentsCreated:
+          type: array
+          items: { $ref: "#/components/schemas/Incident" }
+      required: [accepted, vehicle, incidentsCreated]
+    Incident:
+      type: object
+      properties:
+        id: { type: string }
+        vehicleId: { type: string }
+        vehicleName: { type: string }
+        type: { type: string, enum: [OVERSPEED, GPS, SENSOR, LOW_VISIBILITY, COMMUNICATION] }
+        severity: { type: string, enum: [LOW, MEDIUM, HIGH, CRITICAL] }
+        status: { type: string, enum: [ACTIVE, RESOLVED, REJECTED] }
+        message: { type: string }
+        createdAt: { type: string, format: date-time }
+        resolvedAt: { type: ["string", "null"], format: date-time }
+      required: [id, vehicleId, vehicleName, type, severity, status, message, createdAt, resolvedAt]
+    ResolutionResult:
+      type: object
+      properties:
+        incident: { $ref: "#/components/schemas/Incident" }
+        message: { type: string }
+        accepted: { type: boolean }
+      required: [incident, message, accepted]
+    Trip:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        source: { type: string }
+        destination: { type: string }
+        assignmentStatus: { type: string, enum: [FREE, ASSIGNED] }
+        vehicleId: { type: ["string", "null"] }
+        vehicleName: { type: ["string", "null"] }
+        completedCycles: { type: integer }
+        createdAt: { type: string, format: date-time }
+      required: [id, name, source, destination, assignmentStatus, vehicleId, vehicleName, completedCycles, createdAt]
+    TripInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        source: { type: string, minLength: 1 }
+        destination: { type: string, minLength: 1 }
+      required: [name, source, destination]
+    TripAssignmentInput:
+      type: object
+      properties: { vehicleId: { type: string, minLength: 1 } }
+      required: [vehicleId]
+    DashboardSummary:
+      type: object
+      properties:
+        totalActiveVehicles: { type: integer }
+        connectedVehicles: { type: integer }
+        runningVehicles: { type: integer }
+        idleVehicles: { type: integer }
+        activeIncidents: { type: integer }
+        criticalAlerts: { type: integer }
+        trips: { type: integer }
+        completedCycles: { type: integer }
+      required: [totalActiveVehicles, connectedVehicles, runningVehicles, idleVehicles, activeIncidents, criticalAlerts, trips, completedCycles]
+    SafetyRow:
+      type: object
+      properties:
+        vehicle: { $ref: "#/components/schemas/Vehicle" }
+        gpsHealthy: { type: boolean }
+        sensorHealthy: { type: boolean }
+        cameraHealthy: { type: boolean }
+        safetyStatus: { type: string, enum: [SAFE, UNSAFE] }
+      required: [vehicle, gpsHealthy, sensorHealthy, cameraHealthy, safetyStatus]
