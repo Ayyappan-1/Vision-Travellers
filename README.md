@@ -19,6 +19,7 @@ data to detect nearby hazards, estimate risk and provide timely driver warnings.
 # PROBLEM:
 
 Low visibility on mine haul roads can reduce a driver's ability to identify:
+
 #Nearby vehicles and moving equipment
 #People and obstacles.
 #Changes in road conditions.
@@ -50,40 +51,7 @@ The fleet dashboard provides:
 
 # SYSTEM ARCHITECTURE:
 
-┌──────────────────────────────┐
-│       MINE VEHICLE           │
-│                              │
-│  mmWave Radar                │
-│  Thermal / IR Camera         │
-│  GNSS / GPS                  │
-│  IMU                         │
-│          │                   │
-│          ▼                   │
-│   Edge Processing Unit       │
-│   Sensor Fusion + Risk       │
-│   Detection / Risk Engine    │
-│          │                   │
-│     ┌────┴────┐              │
-│     ▼         ▼              │
-│ Driver HMI   Communication   │
-│ Alerts       Module          │
-└─────────┬───────────┬────────┘
-          │           │
-          │ 4G / LoRa │
-          ▼           ▼
-      ┌─────────────────────┐
-      │ Central Server       │
-      │ Backend + Database   │
-      │ Safety Engine        │
-      └──────────┬──────────┘
-                 │
-                 ▼
-      ┌─────────────────────┐
-      │ Fleet Dashboard     │
-      │ Control Room        │
-      │ Live Map + Alerts   │
-      │ Reports + Health    │
-      └─────────────────────┘
+<img width="1326" height="684" alt="image" src="https://github.com/user-attachments/assets/675069f7-8737-45bf-b94a-8e8a1987b375" />
 
 # How It Works
 ^Sensors continuously collect vehicle, position and surrounding-object information.
@@ -208,8 +176,7 @@ The web dashboard is intended for fleet and control-room operations and provides
 # Fleet Monitoring
 Each physical vehicle is treated as an independent vehicle system with
 its own sensing and edge-processing unit.
-The central fleet platform maintains the relationship between:
-``` text
+
 Vehicle
    ↓
 Vehicle Hardware / Device
@@ -219,10 +186,6 @@ Telemetry & Safety Events
 Central Backend
    ↓
 Fleet / Control-Room Dashboard
-```
-This allows the system to scale from a single prototype vehicle to
-multiple mine vehicles.
----
 # Communication
 The proposed architecture supports hybrid communication:
 
@@ -254,23 +217,8 @@ Retrofit-oriented deployment
 The prototype focuses on validating the core safety workflow rather than
 reproducing the complete industrial hardware stack.
 Demonstration Flow
-``` text
-Sensor Input
-     ↓
-Vehicle / Edge Processing
-     ↓
-Risk Calculation
-     ↓
-Driver Alert
-     ↓
-Telemetry Transmission
-     ↓
-Central Backend
-     ↓
-Fleet Dashboard
-```
-The prototype is intended to demonstrate that the same architecture can
-be extended toward industrial-grade hardware and mine deployment.
+
+The prototype is intended to demonstrate that the same architecture can be extended toward industrial-grade hardware and mine deployment.
 ---
 # Expected Impact
 #Drivers
@@ -299,8 +247,6 @@ The same platform can also be extended to additional mining-safety use cases suc
 ^Expanded digital-twin capabilities
 ---
 # Repository Structure
-
-```Mine-Vision-X/
 │
 ├── README.md
 ├── .gitignore
